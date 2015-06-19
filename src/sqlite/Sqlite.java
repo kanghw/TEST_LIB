@@ -15,35 +15,35 @@ public class Sqlite {
         try {
             con = connectDB();
             
-            // create table, delete table
-//            String cteateTest = "create table test(id integer primary key AUTOINCREMENT,"
-//                    + "name varchar(50) not null,"
-//                    + "age int not null,"
-//                    + "address char(50))";
-//            String delTest = "drop table test";
-//            
-//            executeSQL(con, cteateTest);
+            // create table
+            String cteateTable = "create table test(id integer primary key AUTOINCREMENT,"
+                    + "name varchar(50) not null,"
+                    + "age int not null,"
+                    + "address char(50))";
+            Integer createResult = executeSQL(con, cteateTable);
+            System.out.println("create table result = " + createResult);
 
             // insert
-//            String insert = "insert into test(name, age, address) values(?, ?, ?)";
-//            PreparedStatement pstmt = con.prepareStatement(insert);
-//            pstmt.setString(1, "강현욱");
-//            pstmt.setInt(2, 30);
-//            pstmt.setString(3, "관악구");
-//            pstmt.executeUpdate();
-//            
-//            pstmt.setString(1, "이정우");
-//            pstmt.setInt(2, 33);
-//            pstmt.setString(3, "하남");
-//            pstmt.executeUpdate();
+            String insert = "insert into test(name, age, address) values(?, ?, ?)";
+            PreparedStatement insertPstmt = con.prepareStatement(insert);
+            insertPstmt.setString(1, "whoami");
+            insertPstmt.setInt(2, 30);
+            insertPstmt.setString(3, "whereami");
+            executeUpdate(insertPstmt);
+            
+            insertPstmt = con.prepareStatement(insert);
+            insertPstmt.setString(1, "whoareyou");
+            insertPstmt.setInt(2, 33);
+            insertPstmt.setString(3, "whereareyou");
+            executeUpdate(insertPstmt);
 
             // update
-//            String updateSql = "update test set age = ? where name = ?";
-//            PreparedStatement updatePstmt = con.prepareStatement(updateSql);
-//            updatePstmt.setInt(1, 36);
-//            updatePstmt.setString(2, "강현욱");
-//            Integer updateResult = updatePstmt.executeUpdate();
-//            System.out.println("update rows = " + updateResult);
+            String updateSql = "update test set age = ? where name = ?";
+            PreparedStatement updatePstmt = con.prepareStatement(updateSql);
+            updatePstmt.setInt(1, 36);
+            updatePstmt.setString(2, "whoami");
+            Integer updateResult = executeUpdate(updatePstmt);
+            System.out.println("update rows = " + updateResult);
             
             // select
             String selectSql = "select * from test";
@@ -57,12 +57,19 @@ public class Sqlite {
                 
                 System.out.println("id = " + id + ", name = " + name + ", age = " + age + ", address = " + address);
             }
+            rs.close();
+            selectPstmt.close();
             
             // delete
-//            String deleteSql = "delete from test";
-//            PreparedStatement deletePstmt = con.prepareStatement(deleteSql);
-//            Integer deleteResult = deletePstmt.executeUpdate();
-//            System.out.println("delete count = " + deleteResult);
+            String deleteSql = "delete from test";
+            PreparedStatement deletePstmt = con.prepareStatement(deleteSql);
+            Integer deleteResult = executeUpdate(deletePstmt);
+            System.out.println("delete count = " + deleteResult);
+            
+            // delete table
+            String deleteTable = "drop table test";
+            Integer dropResult = executeSQL(con, deleteTable);
+            System.out.println("drop table result = " + dropResult);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,11 +88,12 @@ public class Sqlite {
         return DriverManager.getConnection(DB_NAME); 
     }
     
-    private static void executeSQL(Connection c, String sql){
+    private static Integer executeSQL(Connection c, String sql){
+        Integer result = null;
         Statement stmt = null;
         try {
             stmt = c.createStatement();
-            stmt.executeUpdate(sql);
+            result = stmt.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally{
@@ -95,5 +103,22 @@ public class Sqlite {
                 e.printStackTrace();
             }
         }
+        return result;
+    }
+    
+    private static Integer executeUpdate(PreparedStatement pstmt){
+        Integer result = null;
+        try {
+            result = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                pstmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }
